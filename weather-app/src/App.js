@@ -17,7 +17,10 @@ async function fetchWeatherData(city) {
       let msg = `HTTP ${response.status}`;
       try {
         const j = await response.json();
-        if (j?.message) msg = j.message;
+        if (j?.message) {
+          msg = j.message.charAt(0).toUpperCase() + j.message.slice(1);
+          if (!msg.endsWith('.')) msg += '.';
+        }
       } catch {}
       throw new Error(msg);
     }
