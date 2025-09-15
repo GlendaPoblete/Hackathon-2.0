@@ -8,7 +8,7 @@ const INITIAL_CITIES = ['Manila', 'Bern', 'Delhi', 'Lilongwe', 'Islamabad'];
 const API_KEY = process.env.REACT_APP_OWM_API_KEY;
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-// ASYNC FUNCTION
+// ASYNC FETCH FUNCTION
 async function fetchWeatherData(city) {
   const url = `${BASE_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
   try {
@@ -32,10 +32,7 @@ export default function App() {
   // SEPARATE STATES
   const [defaultCities, setDefaultCities] = useState(INITIAL_CITIES);
   const [defaultWeather, setDefaultWeather] = useState({});
-  const [searchCity, setSearchCity] = useState('');
-  const [searchError, setSearchError] = useState('');
-  const [searchedWeather, setSearchedWeather] = useState(null);
-
+  
   // FETCH WEATHER FOR DEFAULT CITY
   function loadDefaultCityWeather(city) {
     const key = city.toLowerCase();
@@ -44,21 +41,17 @@ export default function App() {
       .then((data) =>
         setDefaultWeather((m) => ({ ...m, [key]: { status: 'ready', data } }))
       )
-      .catch((err) =>
-        setDefaultWeather((m) => ({
-          ...m,
-          [key]: { status: 'error', error: err.message },
-        }))
+     .catch((err) =>
+        setDefaultWeather((m) => ({ ...m, [key]: { status: 'error', error: err.message } }))
       );
   }
 
-  // Load all default cities on mount
+  // LOAD DEFAULT CITIES
   useEffect(() => {
     defaultCities.forEach((c) => loadDefaultCityWeather(c));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle editing default city names
+  // EDIT DEFAULT CITIES
   function handleEditCity(index, newName) {
     const updated = [...defaultCities];
     updated[index] = newName;
@@ -66,35 +59,17 @@ export default function App() {
     if (newName.trim()) loadDefaultCityWeather(newName);
   }
 
-  // Handle searching a new city (separate from default ones)
-  async function handleSearch(e) {
-    e.preventDefault();
-    setSearchError('');
-    const trimmed = searchCity.trim();
-    if (!trimmed) return;
-
-    setSearchedWeather({ status: 'loading', city: trimmed });
-    try {
-      const data = await fetchWeatherData(trimmed);
-      setSearchedWeather({ status: 'ready', data });
-    } catch (err) {
-      setSearchedWeather({ status: 'error', error: err.message });
-      setSearchError(`Could not find weather for "${trimmed}": ${err.message}`);
-    } finally {
-      setSearchCity('');
-    }
-  }
-
+  
   return (
     <div className="container">
       <header className="header">
-        <h1>Weather Checker 🌦️</h1>
+        <h1>GRL Weather Checker 🌦️</h1>
         <p className="subtitle">
           Current conditions powered by OpenWeatherMap
         </p>
       </header>
 
-      {/* Default weather cards */}
+      {/* DEFAULT WEATHER CARDS */}
       <main className="grid">
         {defaultCities.map((c) => {
           const key = c.toLowerCase();
@@ -111,7 +86,7 @@ export default function App() {
         })}
       </main>
 
-      {/* Editable default cities row */}
+      {/* EDITABLE DEFAULT WEATHER CITIES */}
       <div className="edit-cities">
         {defaultCities.map((city, index) => (
           <input
@@ -121,44 +96,7 @@ export default function App() {
             onChange={(e) => handleEditCity(index, e.target.value)}
           />
         ))}
-      </div>
-
-      {/* Search form centered below */}
-      <form className="search" onSubmit={handleSearch} autoComplete="off">
-        <input
-          type="text"
-          placeholder="Type a city (e.g., London)…"
-          value={searchCity}
-          onChange={(e) => setSearchCity(e.target.value)}
-          aria-label="City name"
-        />
-        <button type="submit" disabled={!searchCity.trim()}>
-          Search
-        </button>
-      </form>
-
-      {searchError ? <div className="banner warn">{searchError}</div> : null}
-
-      {/* Searched city weather separate below */}
-      <div className="searched-city">
-        {searchedWeather && searchedWeather.status === 'loading' && (
-          <div className="loading">Loading weather…</div>
-        )}
-        {searchedWeather && searchedWeather.status === 'error' && (
-          <div className="banner warn">
-            Could not load city: {searchedWeather.error}
-          </div>
-        )}
-        {searchedWeather && searchedWeather.status === 'ready' && (
-          <div className="search-result">
-            <WeatherCard
-              cityLabel={searchedWeather.data?.name}
-              status="ready"
-              data={searchedWeather.data}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+     </div>
+     </div>
   );
 }
