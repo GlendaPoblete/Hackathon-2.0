@@ -49,6 +49,7 @@ export default function App() {
   // LOAD DEFAULT CITIES
   useEffect(() => {
     defaultCities.forEach((c) => loadDefaultCityWeather(c));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // EDIT DEFAULT CITIES
